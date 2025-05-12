@@ -5,6 +5,8 @@ EventBuddy is a social platform that helps you find companions to attend local e
 ## Features
 
 - **Event Discovery**: Browse through a curated list of local events
+- **Real Chicago Events**: Integration with Chicago Park District Event Permits API
+- **Data Source Selection**: Toggle between Firebase and Chicago API data sources
 - **Find Event Buddies**: Connect with like-minded people interested in the same events
 - **Interest Matching**: Get matched with users who share similar interests
 - **In-app Messaging**: Communicate with potential event buddies directly in the app
@@ -16,6 +18,7 @@ EventBuddy is a social platform that helps you find companions to attend local e
 - **Backend**: Express.js with TypeScript
 - **Authentication**: Firebase Authentication with Google Sign-in
 - **Database**: MongoDB for data storage
+- **External API**: Chicago Park District Event Permits API
 - **State Management**: TanStack Query (React Query)
 - **Routing**: Wouter for lightweight client-side routing
 
@@ -32,9 +35,17 @@ EventBuddy is a social platform that helps you find companions to attend local e
 The application requires the following environment variables:
 
 ```
+# Firebase Configuration
 VITE_FIREBASE_API_KEY=your_firebase_api_key
 VITE_FIREBASE_PROJECT_ID=your_firebase_project_id
 VITE_FIREBASE_APP_ID=your_firebase_app_id
+
+# Database Configuration (For server)
+MONGODB_URI=your_mongodb_connection_string
+
+# Optional: Chicago API Configuration
+# The application uses the Chicago Park District Event Permits API by default
+# No API key is required as it's a public dataset
 ```
 
 ### Firebase Setup
@@ -150,9 +161,17 @@ Once deployed, your app will be available at `https://your-project-id.web.app` a
 
 The application provides the following API endpoints:
 
+### Events
 - `GET /api/events` - Get all events
+- `GET /api/events?source=chicago` - Get events from Chicago API
+- `GET /api/events?category=Sports` - Get events filtered by category
 - `GET /api/events/:id` - Get a specific event
 - `GET /api/events/featured` - Get featured events
+- `GET /api/events/featured?source=chicago` - Get featured events from Chicago API
+- `GET /api/chicago-events` - Dedicated endpoint for Chicago events
+- `GET /api/chicago-events?category=Festival` - Get Chicago events filtered by category
+
+### Users and Social
 - `GET /api/users/:id` - Get user profile
 - `POST /api/buddy-requests` - Create a buddy request
 - `GET /api/buddy-requests/:userId` - Get user's buddy requests
