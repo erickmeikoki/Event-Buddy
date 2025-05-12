@@ -16,8 +16,18 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { UserIcon, Mail, Lock } from "lucide-react";
-import { auth, signInWithEmailAndPassword } from "@/lib/firebase";
+import { 
+  auth, 
+  signInWithEmailAndPassword, 
+  signInWithGoogle, 
+  signInWithGoogleRedirect, 
+  db, 
+  doc, 
+  getDoc, 
+  setDoc 
+} from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const formSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address" }),
@@ -28,7 +38,9 @@ const formSchema = z.object({
 export default function LoginPage() {
   const [, navigate] = useLocation();
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -74,6 +86,56 @@ export default function LoginPage() {
       });
     } finally {
       setLoading(false);
+    }
+  };
+  
+  const handleGoogleSignIn = async () => {
+    try {
+      setGoogleLoading(true);
+      
+      // Use the appropriate method based on device type
+      const result = isMobile 
+        ? await signInWithGoogleRedirect() 
+        : await signInWithGoogle();
+      
+      // This will only execute for signInWithPopup (desktop)
+      // For redirect method, the page will reload and we need to handle in useEffect
+      if (result?.user) {
+        // Check if the user already exists in Firestore
+        const userRef = doc(db, "users", result.user.uid);
+        const userDoc = await getDoc(userRef);
+        
+        if (!userDoc.exists()) {
+          // If the user doesn't exist, create a new document
+          await setDoc(userRef, {
+            uid: result.user.uid,
+            displayName: result.user.displayName || "User",
+            email: result.user.email,
+            profileImageUrl: result.user.photoURL || "",
+            location: "",
+            bio: "",
+            createdAt: new Date()
+          });
+        }
+        
+        toast({
+          title: "Login successful!",
+          description: "Welcome to EventBuddy.",
+          variant: "default",
+        });
+        
+        navigate("/");
+      }
+    } catch (error: any) {
+      console.error("Error signing in with Google:", error);
+      
+      toast({
+        title: "Google Sign-In failed",
+        description: "There was an issue signing in with Google. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setGoogleLoading(false);
     }
   };
 

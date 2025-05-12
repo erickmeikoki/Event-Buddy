@@ -6,6 +6,10 @@ import {
   signOut,
   updateProfile,
   onAuthStateChanged,
+  GoogleAuthProvider,
+  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   User
 } from "firebase/auth";
 import { 
@@ -60,6 +64,18 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const storage = getStorage(app);
 
+// Initialize Google Auth Provider
+const googleProvider = new GoogleAuthProvider();
+googleProvider.setCustomParameters({
+  prompt: 'select_account'
+});
+
+// Function to sign in with Google using a popup
+const signInWithGoogle = () => signInWithPopup(auth, googleProvider);
+
+// Function to sign in with Google using a redirect (better for mobile)
+const signInWithGoogleRedirect = () => signInWithRedirect(auth, googleProvider);
+
 export {
   app,
   auth,
@@ -70,6 +86,10 @@ export {
   signOut,
   updateProfile,
   onAuthStateChanged,
+  GoogleAuthProvider,
+  signInWithGoogle,
+  signInWithGoogleRedirect,
+  getRedirectResult,
   collection,
   doc,
   setDoc,

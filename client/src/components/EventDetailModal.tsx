@@ -6,7 +6,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
-  DialogClose
+  DialogClose,
+  DialogDescription
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -36,6 +37,7 @@ export default function EventDetailModal({
             <X className="h-5 w-5" />
           </DialogClose>
         </DialogHeader>
+        <DialogDescription className="sr-only">Detailed information about the event, including date, location, and description.</DialogDescription>
         
         <div className="overflow-y-auto flex-1 p-0">
           <img
