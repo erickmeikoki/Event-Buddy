@@ -128,9 +128,9 @@ function convertChicagoEvent(event: ChicagoEventRaw, index: number): InsertEvent
 /**
  * Fetch events from the Chicago Park District API
  */
-export async function fetchChicagoEvents(limit: number = 50): Promise<InsertEvent[]> {
+export async function fetchChicagoEvents(category?: string, limit: number = 50): Promise<InsertEvent[]> {
   try {
-    const response = await axios.get(`${CHICAGO_EVENTS_API_URL}&$limit=${limit}`);
+    const response = await axios.get(`${CHICAGO_EVENTS_API_URL}&$limit=${Math.max(limit * 2, 100)}`);
     
     if (!response.data || !response.data.data || !Array.isArray(response.data.data)) {
       console.error('Unexpected API response format:', response.data);
@@ -142,15 +142,27 @@ export async function fetchChicagoEvents(limit: number = 50): Promise<InsertEven
       event[16] === 'Approved' || event[16] === 'Tentative'
     );
     
-    // Sort by date (newest first) and take only what we need
+    // Sort by date (newest first)
     const sortedEvents = validEvents.sort((a: ChicagoEventRaw, b: ChicagoEventRaw) => {
       const dateA = new Date(a[12] || 0).getTime();
       const dateB = new Date(b[12] || 0).getTime();
       return dateB - dateA;
     });
     
-    // Convert to our format and limit to what's requested
-    return sortedEvents.slice(0, limit).map(convertChicagoEvent);
+    // Convert all events to our format
+    const convertedEvents = sortedEvents.map(convertChicagoEvent);
+    
+    // Filter by category if specified
+    let filteredEvents = convertedEvents;
+    if (category) {
+      const categoryLower = category.toLowerCase();
+      filteredEvents = convertedEvents.filter((event: InsertEvent) => 
+        event.category.toLowerCase() === categoryLower
+      );
+    }
+    
+    // Return the requested number of events
+    return filteredEvents.slice(0, limit);
   } catch (error) {
     console.error('Error fetching Chicago events:', error);
     return [];
@@ -161,7 +173,8 @@ export async function fetchChicagoEvents(limit: number = 50): Promise<InsertEven
  * Fetch featured events from the Chicago Park District API
  */
 export async function fetchFeaturedChicagoEvents(limit: number = 5): Promise<InsertEvent[]> {
-  const events = await fetchChicagoEvents(20);
+  // Get a larger set of events to ensure we have enough to choose from
+  const events = await fetchChicagoEvents(undefined, 20);
   
   // Take the first 'limit' events and mark them as featured
   return events.slice(0, limit).map(event => ({
@@ -176,10 +189,10 @@ export async function fetchFeaturedChicagoEvents(limit: number = 5): Promise<Ins
 export async function findChicagoEventByTitle(title: string): Promise<InsertEvent | null> {
   try {
     // Fetch a larger batch of events to search through
-    const events = await fetchChicagoEvents(100);
+    const events = await fetchChicagoEvents(undefined, 100);
     
     // Look for a case-insensitive partial match
-    const matchedEvent = events.find(event => 
+    const matchedEvent = events.find((event: InsertEvent) => 
       event.title.toLowerCase().includes(title.toLowerCase())
     );
     

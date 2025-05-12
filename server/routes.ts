@@ -118,14 +118,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // If source=chicago, fetch from Chicago API
       if (source === 'chicago') {
-        const events = await fetchChicagoEvents(50);
-        
-        // Filter by category if specified
-        const filteredEvents = category 
-          ? events.filter(event => event.category.toLowerCase() === (category as string).toLowerCase())
-          : events;
-          
-        res.status(200).json(filteredEvents);
+        // Pass the category to fetchChicagoEvents
+        const events = await fetchChicagoEvents(
+          category && category !== 'All Events' ? category as string : undefined, 
+          50
+        );
+        res.status(200).json(events);
       } else {
         // Otherwise use our storage
         const events = await storage.getEvents(category as string | undefined);
@@ -162,14 +160,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { limit = '50', category } = req.query;
       const numLimit = parseInt(limit as string) || 50;
       
-      const events = await fetchChicagoEvents(numLimit);
-      
-      // Filter by category if specified
-      const filteredEvents = category 
-        ? events.filter(event => event.category.toLowerCase() === (category as string).toLowerCase())
-        : events;
+      // Pass category directly to the fetchChicagoEvents function
+      const categoryParam = category && category !== 'All Events' 
+        ? category as string 
+        : undefined;
         
-      res.status(200).json(filteredEvents);
+      const events = await fetchChicagoEvents(categoryParam, numLimit);
+      res.status(200).json(events);
     } catch (error) {
       console.error('Error fetching Chicago events:', error);
       res.status(500).json({ message: 'Failed to fetch Chicago events' });
