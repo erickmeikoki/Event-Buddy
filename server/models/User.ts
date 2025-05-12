@@ -12,6 +12,7 @@ export interface UserDocument extends Document {
   location?: string;
   
   // Additional properties for MongoDB
+  numericId?: number;     // Added for compatibility with our app schema
   firebaseUid?: string;
   createdAt?: Date;
   updatedAt?: Date;
@@ -20,6 +21,7 @@ export interface UserDocument extends Document {
 
 // Define the schema for the User model
 const UserSchema: Schema = new Schema({
+  numericId: { type: Number, unique: true }, // Added for compatibility with our app schema
   displayName: { type: String, required: true },
   username: { type: String, required: true, unique: true },
   email: { type: String, required: true, unique: true },

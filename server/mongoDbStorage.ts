@@ -23,7 +23,8 @@ export class MongoDBStorage implements IStorage {
   // User operations
   async getUser(id: number): Promise<User | undefined> {
     try {
-      const user = await UserModel.findById(id);
+      // Find by numeric ID field we generate in createUser
+      const user = await UserModel.findOne({ numericId: id });
       if (!user) return undefined;
       return this.convertUserToSchema(user);
     } catch (error) {
@@ -56,7 +57,15 @@ export class MongoDBStorage implements IStorage {
 
   async createUser(userData: InsertUser): Promise<User> {
     try {
-      const newUser = new UserModel(userData);
+      // Generate a numeric ID for compatibility with our app schema
+      const numericId = Math.floor(Math.random() * 1000000) + 1;
+      
+      // Create user with the numeric ID
+      const newUser = new UserModel({
+        ...userData,
+        numericId
+      });
+      
       const savedUser = await newUser.save();
       return this.convertUserToSchema(savedUser);
     } catch (error) {
