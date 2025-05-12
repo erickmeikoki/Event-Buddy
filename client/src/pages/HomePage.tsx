@@ -233,11 +233,12 @@ export default function HomePage() {
               <div key={index} className="h-[380px] bg-gray-200 animate-pulse rounded-xl"></div>
             ))
           ) : (
-            featuredEventsData.map((event) => (
+            featuredEventsData.map((event, index) => (
               <EventCard 
                 key={event.id} 
                 event={event} 
-                onFindBuddies={handleFindBuddies} 
+                onFindBuddies={handleFindBuddies}
+                index={index} 
               />
             ))
           )}
@@ -257,11 +258,12 @@ export default function HomePage() {
               <div key={index} className="h-[380px] bg-gray-200 animate-pulse rounded-xl"></div>
             ))
           ) : (
-            upcomingEvents.map((event) => (
+            upcomingEvents.map((event, index) => (
               <EventCard 
                 key={event.id} 
                 event={event} 
-                onFindBuddies={handleFindBuddies} 
+                onFindBuddies={handleFindBuddies}
+                index={index + 3} // Continue index count from featured events
               />
             ))
           )}
@@ -276,11 +278,12 @@ export default function HomePage() {
         </div>
         
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {SAMPLE_RECOMMENDATIONS.map((user) => (
+          {SAMPLE_RECOMMENDATIONS.map((user, index) => (
             <UserCard 
               key={user.id} 
               user={user} 
-              onConnect={handleConnectUser} 
+              onConnect={handleConnectUser}
+              index={index}
             />
           ))}
         </div>

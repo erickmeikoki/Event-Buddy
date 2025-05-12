@@ -60,37 +60,71 @@ VITE_FIREBASE_APP_ID=your_firebase_app_id
 
 ### Deployment to Firebase
 
+The project is pre-configured for Firebase deployment with both hosting (frontend) and functions (backend API). Follow these steps to deploy:
+
+#### Quick Deployment
+
 1. Install Firebase CLI globally:
    ```
    npm install -g firebase-tools
    ```
    
-2. Login to Firebase:
+2. Run the provided deployment script:
+   ```
+   ./deploy.sh
+   ```
+
+#### Manual Deployment Steps
+
+If you prefer to deploy manually or need more control:
+
+1. Login to Firebase:
    ```
    firebase login
    ```
    
-3. Initialize your Firebase project:
+2. Set up Firebase environment variables:
    ```
-   firebase init
+   ./firebase-config.sh
    ```
-   - Select "Hosting" and "Functions" (for the backend)
-   - Choose your Firebase project
-   - Set "dist" as your public directory
-   - Configure as a single-page app: Yes
-   - Set up automatic builds and deploys: No
+   This script will prompt you for your MongoDB connection string and set it in Firebase Functions environment.
    
-4. Build your project:
+3. Build the project:
    ```
    npm run build
    ```
    
-5. Deploy to Firebase:
+4. Deploy to Firebase:
    ```
    firebase deploy
    ```
 
-Once deployed, your app will be available at `https://your-project-id.web.app`
+#### Deploying Only Frontend or Backend
+
+- To deploy only the frontend:
+  ```
+  firebase deploy --only hosting
+  ```
+
+- To deploy only the backend:
+  ```
+  firebase deploy --only functions
+  ```
+
+#### Environment Variables in Firebase
+
+Firebase Functions uses a different environment variables system than your local development environment. To set Firebase environment variables:
+
+```
+firebase functions:config:set mongodb.uri="your-mongodb-connection-string"
+```
+
+To get your current Firebase environment variables:
+```
+firebase functions:config:get
+```
+
+Once deployed, your app will be available at `https://your-project-id.web.app` and the API at `https://your-project-id.web.app/api/`
 
 ## Project Structure
 
