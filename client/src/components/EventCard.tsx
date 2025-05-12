@@ -36,10 +36,8 @@ export default function EventCard({ event, onFindBuddies }: EventCardProps) {
       <CardContent className="p-4">
         <div className="flex justify-between items-start">
           <div>
-            <Link href={`/event/${event.id}`}>
-              <a className="font-semibold text-lg mb-1 hover:text-primary transition-colors">
-                {event.title}
-              </a>
+            <Link href={`/event/${event.id}`} className="font-semibold text-lg mb-1 hover:text-primary transition-colors">
+              {event.title}
             </Link>
             <p className="text-gray-500 text-sm flex items-center">
               <MapPinIcon className="h-3 w-3 mr-1" /> 
