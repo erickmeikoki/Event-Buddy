@@ -264,23 +264,23 @@ export class MongoDBStorage implements IStorage {
 
   // Helper methods to convert MongoDB documents to schema types
   private convertUserToSchema(user: UserDocument): User {
+    const id = parseInt(user._id?.toString() || '0');
     return {
-      id: parseInt(user._id?.toString() || '0'),
+      id,
       displayName: user.displayName || '',
       username: user.username || '',
       email: user.email || '',
       profileImageUrl: user.profileImageUrl || null,
       bio: user.bio || null,
       location: user.location || null,
-      interests: [],
-      createdAt: new Date(),
-      updatedAt: new Date()
+      uid: user.firebaseUid || '',
     };
   }
 
   private convertEventToSchema(event: EventDocument): Event {
+    const id = parseInt(event._id?.toString() || '0');
     return {
-      id: parseInt(event._id?.toString() || '0'),
+      id,
       title: event.title || '',
       description: event.description || '',
       category: event.category || '',
@@ -291,43 +291,70 @@ export class MongoDBStorage implements IStorage {
       imageUrl: event.imageUrl || '',
       priceRange: event.priceRange || null,
       featured: event.featured || false,
-      createdAt: new Date(),
-      updatedAt: new Date()
     };
   }
 
   private convertInterestToSchema(interest: InterestDocument): Interest {
+    const id = parseInt(interest._id?.toString() || '0');
     return {
-      id: parseInt(interest._id?.toString() || '0'),
+      id,
       name: interest.name || '',
-      category: '',
-      createdAt: new Date(),
-      updatedAt: new Date()
     };
   }
 
   private convertBuddyRequestToSchema(request: BuddyRequestDocument): BuddyRequest {
+    const id = parseInt(request._id?.toString() || '0');
     return {
-      id: parseInt(request._id?.toString() || '0'),
-      senderId: 0,
-      receiverId: 0,
-      eventId: 0,
+      id,
+      requesterId: typeof request.requesterId === 'object' 
+        ? parseInt(request.requesterId.toString()) 
+        : (request.requesterId as unknown as number) || 0,
+      receiverId: typeof request.receiverId === 'object' 
+        ? parseInt(request.receiverId.toString()) 
+        : (request.receiverId as unknown as number) || 0,
+      eventId: typeof request.eventId === 'object' 
+        ? parseInt(request.eventId.toString()) 
+        : (request.eventId as unknown as number) || 0,
       message: request.message || null,
       status: request.status || 'pending',
-      createdAt: new Date(),
-      updatedAt: new Date()
+      createdAt: request.createdAt || new Date(),
     };
   }
 
   private convertMessageToSchema(message: MessageDocument): Message {
+    const id = parseInt(message._id?.toString() || '0');
+    let senderId = 0;
+    let receiverId = 0;
+    
+    // Handle senderId which can be a string, ObjectId, or number
+    if (message.senderId) {
+      if (typeof message.senderId === 'object' && message.senderId._id) {
+        senderId = parseInt(message.senderId._id.toString());
+      } else if (typeof message.senderId === 'object') {
+        senderId = parseInt(String(message.senderId));
+      } else {
+        senderId = parseInt(String(message.senderId));
+      }
+    }
+    
+    // Handle receiverId which can be a string, ObjectId, or number
+    if (message.receiverId) {
+      if (typeof message.receiverId === 'object' && message.receiverId._id) {
+        receiverId = parseInt(message.receiverId._id.toString());
+      } else if (typeof message.receiverId === 'object') {
+        receiverId = parseInt(String(message.receiverId));
+      } else {
+        receiverId = parseInt(String(message.receiverId));
+      }
+    }
+    
     return {
-      id: parseInt(message._id?.toString() || '0'),
-      senderId: 0,
-      receiverId: 0,
+      id,
+      senderId,
+      receiverId,
       content: message.content || '',
-      isRead: message.read || false,
-      createdAt: new Date(),
-      updatedAt: new Date()
+      read: message.read || false,
+      createdAt: message.createdAt || new Date(),
     };
   }
 }

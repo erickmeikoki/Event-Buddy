@@ -3,12 +3,17 @@ import { BuddyRequest } from '@shared/schema';
 
 // Define the interface for the BuddyRequest document
 export interface BuddyRequestDocument extends Document, Omit<BuddyRequest, 'id'> {
-  // Add any additional methods if needed
+  // Additional properties not in schema.ts but needed for MongoDB
+  requesterId: any;
+  receiverId: any;
+  eventId: any;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 // Define the schema for the BuddyRequest model
 const BuddyRequestSchema: Schema = new Schema({
-  senderId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+  requesterId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   receiverId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   eventId: { type: Schema.Types.ObjectId, ref: 'Event', required: true },
   message: { type: String },

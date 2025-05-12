@@ -3,7 +3,9 @@ import { Event } from '@shared/schema';
 
 // Define the interface for the Event document
 export interface EventDocument extends Document, Omit<Event, 'id'> {
-  // Add any additional methods if needed
+  // Additional properties not in schema.ts but needed for MongoDB
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 // Define the schema for the Event model

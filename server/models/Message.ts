@@ -3,7 +3,12 @@ import { Message } from '@shared/schema';
 
 // Define the interface for the Message document
 export interface MessageDocument extends Document, Omit<Message, 'id'> {
-  // Add any additional methods if needed
+  // Additional properties not in schema.ts but needed for MongoDB
+  senderId: any;
+  receiverId: any;
+  read?: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 // Define the schema for the Message model

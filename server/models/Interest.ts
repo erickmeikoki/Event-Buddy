@@ -3,7 +3,10 @@ import { Interest } from '@shared/schema';
 
 // Define the interface for the Interest document
 export interface InterestDocument extends Document, Omit<Interest, 'id'> {
-  // Add any additional methods if needed
+  // Additional properties not in schema.ts but needed for MongoDB
+  category?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 // Define the schema for the Interest model

@@ -3,7 +3,11 @@ import { User } from '@shared/schema';
 
 // Define the interface for the User document
 export interface UserDocument extends Document, Omit<User, 'id'> {
-  // Add any additional methods if needed
+  // Additional properties not in schema.ts but needed for MongoDB
+  firebaseUid?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+  interests?: any[];
 }
 
 // Define the schema for the User model
