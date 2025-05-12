@@ -13,8 +13,7 @@ export default function MobileHeader() {
         <button className="text-gray-600">
           <SearchIcon className="h-5 w-5" />
         </button>
-        <Link href="/messages">
-          <a className="text-gray-600 relative">
+        <Link href="/messages" className="text-gray-600 relative">
             <MessageSquareIcon className="h-5 w-5" />
             <Badge 
               variant="secondary" 
@@ -22,7 +21,6 @@ export default function MobileHeader() {
             >
               3
             </Badge>
-          </a>
         </Link>
       </div>
     </header>

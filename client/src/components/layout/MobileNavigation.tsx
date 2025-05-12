@@ -12,26 +12,21 @@ export default function MobileNavigation() {
   return (
     <nav className="lg:hidden bg-white border-t border-gray-200 fixed bottom-0 left-0 right-0 z-10">
       <div className="flex items-center justify-around h-16">
-        <Link href="/">
-          <a className={`flex flex-col items-center justify-center ${
+        <Link href="/" className={`flex flex-col items-center justify-center ${
             isActive("/") ? "text-primary" : "text-gray-500"
           }`}>
             <CalendarIcon className="h-5 w-5" />
             <span className="text-xs mt-1">Events</span>
-          </a>
         </Link>
         
-        <Link href="/find-buddies">
-          <a className={`flex flex-col items-center justify-center ${
+        <Link href="/find-buddies" className={`flex flex-col items-center justify-center ${
             isActive("/find-buddies") ? "text-primary" : "text-gray-500"
           }`}>
             <UsersIcon className="h-5 w-5" />
             <span className="text-xs mt-1">Buddies</span>
-          </a>
         </Link>
         
-        <Link href="/messages">
-          <a className={`flex flex-col items-center justify-center relative ${
+        <Link href="/messages" className={`flex flex-col items-center justify-center relative ${
             isActive("/messages") ? "text-primary" : "text-gray-500"
           }`}>
             <MessageSquareIcon className="h-5 w-5" />
@@ -42,16 +37,13 @@ export default function MobileNavigation() {
             >
               3
             </Badge>
-          </a>
         </Link>
         
-        <Link href="/profile">
-          <a className={`flex flex-col items-center justify-center ${
+        <Link href="/profile" className={`flex flex-col items-center justify-center ${
             isActive("/profile") ? "text-primary" : "text-gray-500"
           }`}>
             <UserIcon className="h-5 w-5" />
             <span className="text-xs mt-1">Profile</span>
-          </a>
         </Link>
       </div>
     </nav>
