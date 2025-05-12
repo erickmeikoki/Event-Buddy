@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -16,8 +16,19 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { UserIcon, Mail, Lock, Calendar, MapPin } from "lucide-react";
-import { createUserWithEmailAndPassword, updateProfile, auth, db, doc, setDoc } from "@/lib/firebase";
+import { 
+  createUserWithEmailAndPassword, 
+  updateProfile, 
+  auth, 
+  db, 
+  doc, 
+  setDoc, 
+  signInWithGoogle,
+  signInWithGoogleRedirect,
+  getRedirectResult
+} from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const formSchema = z.object({
   displayName: z.string().min(2, { message: "Display name must be at least 2 characters" }),
@@ -35,7 +46,102 @@ const formSchema = z.object({
 export default function RegisterPage() {
   const [, navigate] = useLocation();
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const { toast } = useToast();
+  const isMobile = useIsMobile();
+
+  // Handle Google redirect result
+  useEffect(() => {
+    const handleRedirectResult = async () => {
+      try {
+        setGoogleLoading(true);
+        
+        // Get the result of the redirect sign-in
+        const result = await getRedirectResult(auth);
+        
+        if (result?.user) {
+          // Create a new document in Firestore for the user
+          const userRef = doc(db, "users", result.user.uid);
+          await setDoc(userRef, {
+            uid: result.user.uid,
+            displayName: result.user.displayName || "User",
+            email: result.user.email,
+            profileImageUrl: result.user.photoURL || "",
+            location: "",
+            bio: "",
+            createdAt: new Date()
+          });
+          
+          toast({
+            title: "Account created successfully!",
+            description: "Welcome to EventBuddy.",
+            variant: "default",
+          });
+          
+          navigate("/");
+        }
+      } catch (error: any) {
+        console.error("Error handling redirect result:", error);
+        
+        if (error.code !== 'auth/credential-already-in-use') {
+          toast({
+            title: "Google Sign-Up failed",
+            description: "There was an issue signing up with Google. Please try again.",
+            variant: "destructive",
+          });
+        }
+      } finally {
+        setGoogleLoading(false);
+      }
+    };
+    
+    handleRedirectResult();
+  }, [toast, navigate]);
+  
+  const handleGoogleSignIn = async () => {
+    try {
+      setGoogleLoading(true);
+      
+      // Use the appropriate method based on device type
+      const result = isMobile 
+        ? await signInWithGoogleRedirect() 
+        : await signInWithGoogle();
+      
+      // This will only execute for signInWithPopup (desktop)
+      // For redirect method, the page will reload and we need to handle in useEffect
+      if (result?.user) {
+        // Create a new document in Firestore for the user
+        const userRef = doc(db, "users", result.user.uid);
+        await setDoc(userRef, {
+          uid: result.user.uid,
+          displayName: result.user.displayName || "User",
+          email: result.user.email,
+          profileImageUrl: result.user.photoURL || "",
+          location: "",
+          bio: "",
+          createdAt: new Date()
+        });
+        
+        toast({
+          title: "Account created successfully!",
+          description: "Welcome to EventBuddy.",
+          variant: "default",
+        });
+        
+        navigate("/");
+      }
+    } catch (error: any) {
+      console.error("Error signing up with Google:", error);
+      
+      toast({
+        title: "Google Sign-Up failed",
+        description: "There was an issue signing up with Google. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
