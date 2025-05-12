@@ -2,8 +2,11 @@ import mongoose, { Schema, Document } from 'mongoose';
 import { Interest } from '@shared/schema';
 
 // Define the interface for the Interest document
-export interface InterestDocument extends Document, Omit<Interest, 'id'> {
-  // Additional properties not in schema.ts but needed for MongoDB
+export interface InterestDocument extends Document {
+  // Properties from the Interest type
+  name: string;
+  
+  // Additional properties for MongoDB
   category?: string;
   createdAt?: Date;
   updatedAt?: Date;

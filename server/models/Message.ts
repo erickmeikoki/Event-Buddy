@@ -2,10 +2,11 @@ import mongoose, { Schema, Document } from 'mongoose';
 import { Message } from '@shared/schema';
 
 // Define the interface for the Message document
-export interface MessageDocument extends Document, Omit<Message, 'id'> {
-  // Additional properties not in schema.ts but needed for MongoDB
+export interface MessageDocument extends Document {
+  // Properties from the Message type
   senderId: any;
   receiverId: any;
+  content: string;
   read?: boolean;
   createdAt?: Date;
   updatedAt?: Date;

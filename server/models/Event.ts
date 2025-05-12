@@ -2,8 +2,20 @@ import mongoose, { Schema, Document } from 'mongoose';
 import { Event } from '@shared/schema';
 
 // Define the interface for the Event document
-export interface EventDocument extends Document, Omit<Event, 'id'> {
-  // Additional properties not in schema.ts but needed for MongoDB
+export interface EventDocument extends Document {
+  // Properties from the Event type
+  title: string;
+  description: string;
+  date: string;
+  time: string;
+  location: string;
+  venue: string;
+  category: string;
+  imageUrl: string;
+  priceRange?: string;
+  featured?: boolean;
+  
+  // Additional properties for MongoDB
   createdAt?: Date;
   updatedAt?: Date;
 }

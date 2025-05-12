@@ -2,8 +2,16 @@ import mongoose, { Schema, Document } from 'mongoose';
 import { User } from '@shared/schema';
 
 // Define the interface for the User document
-export interface UserDocument extends Document, Omit<User, 'id'> {
-  // Additional properties not in schema.ts but needed for MongoDB
+export interface UserDocument extends Document {
+  // Properties from the User type
+  username: string;
+  displayName: string;
+  email: string;
+  profileImageUrl?: string;
+  bio?: string;
+  location?: string;
+  
+  // Additional properties for MongoDB
   firebaseUid?: string;
   createdAt?: Date;
   updatedAt?: Date;

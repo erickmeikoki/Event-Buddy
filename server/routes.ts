@@ -30,6 +30,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/health', (_req, res) => {
     res.status(200).json({ status: 'healthy' });
   });
+  
+  // Test endpoint to create a sample user and retrieve it
+  app.get('/api/test-mongodb', async (_req, res) => {
+    try {
+      // Create a test user
+      const testUser = {
+        username: 'testuser_' + Date.now(),
+        displayName: 'Test User',
+        email: `test${Date.now()}@example.com`,
+        bio: 'This is a test user created to verify MongoDB integration',
+        profileImageUrl: null,
+        location: 'Test City',
+        uid: 'test_' + Date.now()
+      };
+      
+      const createdUser = await storage.createUser(testUser);
+      const retrievedUser = await storage.getUser(createdUser.id);
+      
+      res.status(200).json({
+        message: 'MongoDB test successful!',
+        created: createdUser,
+        retrieved: retrievedUser,
+        success: retrievedUser !== undefined
+      });
+    } catch (error) {
+      console.error('MongoDB test failed:', error);
+      res.status(500).json({
+        message: 'MongoDB test failed',
+        error: error.message
+      });
+    }
+  });
 
   // User routes
   app.get('/api/users/:id', async (req, res) => {

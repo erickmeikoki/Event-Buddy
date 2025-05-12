@@ -2,11 +2,13 @@ import mongoose, { Schema, Document } from 'mongoose';
 import { BuddyRequest } from '@shared/schema';
 
 // Define the interface for the BuddyRequest document
-export interface BuddyRequestDocument extends Document, Omit<BuddyRequest, 'id'> {
-  // Additional properties not in schema.ts but needed for MongoDB
+export interface BuddyRequestDocument extends Document {
+  // Properties from the BuddyRequest type
   requesterId: any;
   receiverId: any;
   eventId: any;
+  message?: string | null;
+  status?: string;
   createdAt?: Date;
   updatedAt?: Date;
 }

@@ -304,17 +304,48 @@ export class MongoDBStorage implements IStorage {
 
   private convertBuddyRequestToSchema(request: BuddyRequestDocument): BuddyRequest {
     const id = parseInt(request._id?.toString() || '0');
+    let requesterId = 0;
+    let receiverId = 0;
+    let eventId = 0;
+    
+    // Handle requesterId which can be a string, ObjectId, or number
+    if (request.requesterId) {
+      if (typeof request.requesterId === 'object' && request.requesterId._id) {
+        requesterId = parseInt(request.requesterId._id.toString());
+      } else if (typeof request.requesterId === 'object') {
+        requesterId = parseInt(String(request.requesterId));
+      } else {
+        requesterId = parseInt(String(request.requesterId));
+      }
+    }
+    
+    // Handle receiverId which can be a string, ObjectId, or number
+    if (request.receiverId) {
+      if (typeof request.receiverId === 'object' && request.receiverId._id) {
+        receiverId = parseInt(request.receiverId._id.toString());
+      } else if (typeof request.receiverId === 'object') {
+        receiverId = parseInt(String(request.receiverId));
+      } else {
+        receiverId = parseInt(String(request.receiverId));
+      }
+    }
+    
+    // Handle eventId which can be a string, ObjectId, or number
+    if (request.eventId) {
+      if (typeof request.eventId === 'object' && request.eventId._id) {
+        eventId = parseInt(request.eventId._id.toString());
+      } else if (typeof request.eventId === 'object') {
+        eventId = parseInt(String(request.eventId));
+      } else {
+        eventId = parseInt(String(request.eventId));
+      }
+    }
+    
     return {
       id,
-      requesterId: typeof request.requesterId === 'object' 
-        ? parseInt(request.requesterId.toString()) 
-        : (request.requesterId as unknown as number) || 0,
-      receiverId: typeof request.receiverId === 'object' 
-        ? parseInt(request.receiverId.toString()) 
-        : (request.receiverId as unknown as number) || 0,
-      eventId: typeof request.eventId === 'object' 
-        ? parseInt(request.eventId.toString()) 
-        : (request.eventId as unknown as number) || 0,
+      requesterId,
+      receiverId,
+      eventId,
       message: request.message || null,
       status: request.status || 'pending',
       createdAt: request.createdAt || new Date(),
