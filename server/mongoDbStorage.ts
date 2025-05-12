@@ -76,7 +76,9 @@ export class MongoDBStorage implements IStorage {
 
   async updateUser(id: number, userData: Partial<User>): Promise<User> {
     try {
-      const updatedUser = await UserModel.findByIdAndUpdate(id, 
+      // Find by numericId instead of MongoDB's _id
+      const updatedUser = await UserModel.findOneAndUpdate(
+        { numericId: id },
         { ...userData, updatedAt: new Date() }, 
         { new: true }
       );
@@ -273,7 +275,8 @@ export class MongoDBStorage implements IStorage {
 
   // Helper methods to convert MongoDB documents to schema types
   private convertUserToSchema(user: UserDocument): User {
-    const id = parseInt(user._id?.toString() || '0');
+    // Use the numericId if available, otherwise fallback to converting ObjectId
+    const id = user.numericId || parseInt(user._id?.toString() || '0');
     return {
       id,
       displayName: user.displayName || '',

@@ -35,21 +35,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/test-mongodb', async (_req, res) => {
     try {
       // Create a test user
+      const timestamp = Date.now();
       const testUser = {
-        username: 'testuser_' + Date.now(),
+        username: 'testuser_' + timestamp,
         displayName: 'Test User',
-        email: `test${Date.now()}@example.com`,
+        email: `test${timestamp}@example.com`,
         bio: 'This is a test user created to verify MongoDB integration',
         profileImageUrl: null,
         location: 'Test City',
-        uid: 'test_' + Date.now()
+        uid: 'test_' + timestamp
       };
       
+      console.log('Creating test user...');
       const createdUser = await storage.createUser(testUser);
+      console.log('User created with ID:', createdUser.id);
+      
+      // Find user by numericId
+      console.log('Attempting to retrieve user with ID:', createdUser.id);
       const retrievedUser = await storage.getUser(createdUser.id);
       
+      // Import UserModel to query directly
+      import('../server/models/User').then(async (UserModule) => {
+        const UserModel = UserModule.default;
+        const allUsers = await UserModel.find({}).lean();
+        console.log('Found', allUsers.length, 'users in database');
+        
+        // Look specifically for the just-created user
+        const foundUserDirect = allUsers.find(u => u.numericId === createdUser.id);
+        console.log('User found directly from MongoDB:', !!foundUserDirect);
+      }).catch(err => {
+        console.error('Error querying MongoDB directly:', err);
+      });
+      
       res.status(200).json({
-        message: 'MongoDB test successful!',
+        message: 'MongoDB test results',
         created: createdUser,
         retrieved: retrievedUser,
         success: retrievedUser !== undefined
