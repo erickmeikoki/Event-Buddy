@@ -8,8 +8,11 @@ import UserCard from "@/components/UserCard";
 import BuddyMatchModal from "@/components/BuddyMatchModal";
 import EventDetailModal from "@/components/EventDetailModal";
 import { Event } from "@shared/schema";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { DatabaseIcon, CloudIcon } from "lucide-react";
 
-const CATEGORIES = [
+const CHICAGO_CATEGORIES = [
   "All Events",
   "Event",
   "Picnic",
@@ -18,6 +21,15 @@ const CATEGORIES = [
   "Corporate",
   "Wedding",
   "Special Event"
+];
+
+const FIREBASE_CATEGORIES = [
+  "All Events",
+  "Concerts",
+  "Sports",
+  "Food & Drink",
+  "Arts",
+  "Nightlife"
 ];
 
 // Sample matched users for demonstration
@@ -83,8 +95,10 @@ export default function HomePage() {
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [isEventModalOpen, setIsEventModalOpen] = useState(false);
   const [isBuddyModalOpen, setIsBuddyModalOpen] = useState(false);
-
   const [dataSource, setDataSource] = useState<'firebase' | 'chicago'>('chicago');
+  
+  // Get the appropriate category list based on selected data source
+  const categories = dataSource === 'chicago' ? CHICAGO_CATEGORIES : FIREBASE_CATEGORIES;
   
   const { data: eventsData = [], isLoading: isEventsLoading } = useQuery({
     queryKey: ["events", activeCategory, dataSource],
@@ -137,12 +151,29 @@ export default function HomePage() {
 
   return (
     <div className="p-4 lg:p-8 pb-20 lg:pb-8">
-      <h2 className="text-2xl font-bold mb-6 lg:mb-8">Discover Events</h2>
-      
+      <div className="flex items-center justify-between mb-6 lg:mb-8">
+        <h2 className="text-2xl font-bold">Discover Events</h2>
+
+        <div className="flex items-center space-x-4 bg-white/80 backdrop-blur-sm rounded-full shadow-sm py-1.5 px-4">
+          <div className="flex items-center space-x-2">
+            <DatabaseIcon className={`h-4 w-4 ${dataSource === 'firebase' ? 'text-primary' : 'text-gray-400'}`} />
+            <Label htmlFor="data-source-toggle" className="cursor-pointer text-sm">
+              {dataSource === 'firebase' ? 'Firebase' : 'Chicago API'}
+            </Label>
+          </div>
+          <Switch
+            id="data-source-toggle"
+            checked={dataSource === 'chicago'}
+            onCheckedChange={(checked) => setDataSource(checked ? 'chicago' : 'firebase')}
+          />
+          <CloudIcon className={`h-4 w-4 ${dataSource === 'chicago' ? 'text-primary' : 'text-gray-400'}`} />
+        </div>
+      </div>
+
       <LocationSelector location={location} onLocationChange={handleLocationChange} />
       
       <CategoryFilter 
-        categories={CATEGORIES} 
+        categories={categories} 
         activeCategory={activeCategory} 
         onSelectCategory={handleCategoryChange} 
       />
