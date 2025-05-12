@@ -1,9 +1,23 @@
 import { db, collection, query, where, getDocs, doc, getDoc, addDoc, updateDoc, deleteDoc, serverTimestamp } from './firebase';
 import { Event, User, Message, BuddyRequest, Interest } from '@shared/schema';
+import axios from 'axios';
 
 // Event related queries
-export const fetchEvents = async (category?: string): Promise<Event[]> => {
+export const fetchEvents = async (category?: string, source: 'firebase' | 'chicago' = 'firebase'): Promise<Event[]> => {
   try {
+    // If source is chicago, fetch from our backend API that connects to Chicago API
+    if (source === 'chicago') {
+      const params = new URLSearchParams();
+      if (category && category !== 'All Events') {
+        params.append('category', category);
+      }
+      params.append('source', 'chicago');
+      
+      const response = await axios.get(`/api/events?${params.toString()}`);
+      return response.data;
+    }
+    
+    // Otherwise fetch from Firebase
     let eventsQuery;
     
     if (category && category !== 'All Events') {
@@ -23,8 +37,32 @@ export const fetchEvents = async (category?: string): Promise<Event[]> => {
   }
 };
 
-export const fetchEventById = async (eventId: number): Promise<Event | null> => {
+export const fetchChicagoEvents = async (category?: string, limit: number = 50): Promise<Event[]> => {
   try {
+    const params = new URLSearchParams();
+    if (category && category !== 'All Events') {
+      params.append('category', category);
+    }
+    params.append('limit', limit.toString());
+    
+    const response = await axios.get(`/api/chicago-events?${params.toString()}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching Chicago events:', error);
+    throw error;
+  }
+};
+
+export const fetchEventById = async (eventId: number, source: 'firebase' | 'chicago' = 'firebase'): Promise<Event | null> => {
+  try {
+    if (source === 'chicago') {
+      // For Chicago events, we don't have a direct ID lookup,
+      // so we need to fetch all events and find the one we want
+      const response = await axios.get(`/api/events/${eventId}?source=chicago`);
+      return response.data;
+    }
+    
+    // Otherwise fetch from Firebase
     const eventDoc = await getDoc(doc(db, 'events', eventId.toString()));
     
     if (eventDoc.exists()) {
@@ -41,8 +79,14 @@ export const fetchEventById = async (eventId: number): Promise<Event | null> => 
   }
 };
 
-export const fetchFeaturedEvents = async (): Promise<Event[]> => {
+export const fetchFeaturedEvents = async (source: 'firebase' | 'chicago' = 'firebase'): Promise<Event[]> => {
   try {
+    if (source === 'chicago') {
+      const response = await axios.get('/api/events/featured?source=chicago');
+      return response.data;
+    }
+    
+    // Otherwise fetch from Firebase
     const eventsQuery = query(collection(db, 'events'), where('featured', '==', true));
     const snapshot = await getDocs(eventsQuery);
     

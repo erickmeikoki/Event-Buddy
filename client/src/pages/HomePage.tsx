@@ -11,11 +11,13 @@ import { Event } from "@shared/schema";
 
 const CATEGORIES = [
   "All Events",
-  "Concerts",
+  "Event",
+  "Picnic",
+  "Festival",
   "Sports",
-  "Food & Drink",
-  "Arts",
-  "Nightlife"
+  "Corporate",
+  "Wedding",
+  "Special Event"
 ];
 
 // Sample matched users for demonstration
@@ -76,104 +78,29 @@ const SAMPLE_RECOMMENDATIONS = [
 ];
 
 export default function HomePage() {
-  const [location, setLocation] = useState("San Francisco, CA");
+  const [location, setLocation] = useState("Chicago, IL");
   const [activeCategory, setActiveCategory] = useState("All Events");
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [isEventModalOpen, setIsEventModalOpen] = useState(false);
   const [isBuddyModalOpen, setIsBuddyModalOpen] = useState(false);
 
-  // Sample Events Data
-  const mockEvents = [
-    {
-      id: 1,
-      title: "Taylor Swift - The Eras Tour",
-      description: "Experience Taylor Swift's record-breaking Eras Tour, featuring music from her entire catalog. This once-in-a-lifetime concert experience has been selling out stadiums nationwide with stunning visuals, costume changes, and a 3+ hour setlist spanning her incredible career.",
-      category: "Concerts",
-      venue: "Levi's Stadium",
-      location: "Santa Clara, CA",
-      date: "Sat, Aug 5",
-      time: "7:00 PM",
-      priceRange: "$120 - $450",
-      imageUrl: "https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=600&h=400",
-      featured: true
-    },
-    {
-      id: 2,
-      title: "SF Giants vs LA Dodgers",
-      description: "Don't miss this classic baseball rivalry as the San Francisco Giants take on the Los Angeles Dodgers at Oracle Park. Come enjoy America's favorite pastime with stunning views of the San Francisco Bay!",
-      category: "Sports",
-      venue: "Oracle Park",
-      location: "San Francisco, CA",
-      date: "Sun, Jul 23",
-      time: "1:05 PM",
-      priceRange: "$45 - $150",
-      imageUrl: "https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=600&h=400",
-      featured: true
-    },
-    {
-      id: 3,
-      title: "SF Food Festival",
-      description: "Sample the best food San Francisco has to offer at the annual SF Food Festival. With over 50 local vendors, live music, and cooking demonstrations, this is a food lover's paradise.",
-      category: "Food & Drink",
-      venue: "Marina Green",
-      location: "San Francisco, CA",
-      date: "Sat, Jul 29",
-      time: "11:00 AM",
-      priceRange: "$25",
-      imageUrl: "https://images.unsplash.com/photo-1555244162-803834f70033?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=600&h=400",
-      featured: true
-    },
-    {
-      id: 4,
-      title: "Indie Night at The Chapel",
-      description: "Join us for a night of indie music featuring local bands and emerging artists. The Chapel provides an intimate setting for experiencing new music in San Francisco's vibrant Mission District.",
-      category: "Concerts",
-      venue: "The Chapel",
-      location: "San Francisco, CA",
-      date: "Fri, Jul 28",
-      time: "8:00 PM",
-      priceRange: "$25 - $35",
-      imageUrl: "https://images.unsplash.com/photo-1501386761578-eac5c94b800a?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=600&h=400",
-      featured: false
-    },
-    {
-      id: 5,
-      title: "Modern Art Exhibition",
-      description: "Explore the boundaries of contemporary art at this special exhibition featuring works from both established and emerging artists from around the world.",
-      category: "Arts",
-      venue: "SFMOMA",
-      location: "San Francisco, CA",
-      date: "Sat-Sun, Jul 22-30",
-      time: "All Day",
-      priceRange: "$20",
-      imageUrl: "https://images.unsplash.com/photo-1594571302762-8b11a9a6d886?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=600&h=400",
-      featured: false
-    },
-    {
-      id: 6,
-      title: "Saturday Night Club",
-      description: "Dance the night away with our resident DJs spinning the hottest tracks at San Francisco's premier nightclub. VIP tables and bottle service available.",
-      category: "Nightlife",
-      venue: "Temple Nightclub",
-      location: "San Francisco, CA",
-      date: "Sat, Jul 22",
-      time: "10:00 PM",
-      priceRange: "$30",
-      imageUrl: "https://images.unsplash.com/photo-1571185408429-749efca15e39?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=600&h=400",
-      featured: false
-    }
-  ];
-
-  const { data: eventsData = mockEvents, isLoading: isEventsLoading } = useQuery({
-    queryKey: ["events", activeCategory],
-    queryFn: () => fetchEvents(activeCategory === "All Events" ? undefined : activeCategory),
-    enabled: false // Disable real fetching for demo
+  const [dataSource, setDataSource] = useState<'firebase' | 'chicago'>('chicago');
+  
+  const { data: eventsData = [], isLoading: isEventsLoading } = useQuery({
+    queryKey: ["events", activeCategory, dataSource],
+    queryFn: () => fetchEvents(
+      activeCategory === "All Events" ? undefined : activeCategory,
+      dataSource
+    ),
+    enabled: true,
+    refetchOnWindowFocus: false
   });
 
-  const { data: featuredEventsData = mockEvents.filter(e => e.featured), isLoading: isFeaturedLoading } = useQuery({
-    queryKey: ["featuredEvents"],
-    queryFn: fetchFeaturedEvents,
-    enabled: false // Disable real fetching for demo
+  const { data: featuredEventsData = [], isLoading: isFeaturedLoading } = useQuery({
+    queryKey: ["featuredEvents", dataSource],
+    queryFn: () => fetchFeaturedEvents(dataSource),
+    enabled: true,
+    refetchOnWindowFocus: false
   });
 
   const upcomingEvents = eventsData.filter(e => !e.featured).slice(0, 3);
@@ -235,7 +162,7 @@ export default function HomePage() {
           ) : (
             featuredEventsData.map((event, index) => (
               <EventCard 
-                key={event.id} 
+                key={`featured-${event.id || index}`} 
                 event={event} 
                 onFindBuddies={handleFindBuddies}
                 index={index} 
@@ -260,7 +187,7 @@ export default function HomePage() {
           ) : (
             upcomingEvents.map((event, index) => (
               <EventCard 
-                key={event.id} 
+                key={`upcoming-${event.id || index}`} 
                 event={event} 
                 onFindBuddies={handleFindBuddies}
                 index={index + 3} // Continue index count from featured events
