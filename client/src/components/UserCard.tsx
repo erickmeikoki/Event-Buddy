@@ -2,7 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { User } from "@shared/schema";
-import { UserIcon } from "lucide-react";
+import { UserIcon, MessageCircleIcon } from "lucide-react";
 import { motion } from "framer-motion";
 
 interface UserCardProps {
@@ -36,7 +36,6 @@ export default function UserCard({ user, onConnect, index = 0 }: UserCardProps) 
     },
     hover: {
       y: -8,
-      boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
       transition: { 
         type: "spring", 
         stiffness: 200, 
@@ -77,15 +76,27 @@ export default function UserCard({ user, onConnect, index = 0 }: UserCardProps) 
     }
   };
 
+  // Background gradient is based on match percentage
+  const getBgGradient = () => {
+    if (user.matchPercentage >= 90) {
+      return "linear-gradient(45deg, hsla(var(--green), 0.1), hsla(var(--primary), 0.1))";
+    } else if (user.matchPercentage >= 80) {
+      return "linear-gradient(45deg, hsla(var(--primary), 0.1), hsla(var(--purple), 0.1))";
+    } else {
+      return "linear-gradient(45deg, hsla(var(--secondary), 0.07), hsla(var(--purple), 0.07))";
+    }
+  };
+
   return (
     <motion.div
       initial="hidden"
       animate="visible"
       whileHover="hover"
       variants={cardVariants}
+      className="user-card"
     >
-      <Card className="bg-white rounded-xl overflow-hidden h-full">
-        <CardContent className="p-4">
+      <Card className="border-0 h-full" style={{ background: getBgGradient() }}>
+        <CardContent className="p-5">
           <div className="flex flex-col items-center">
             <motion.div 
               initial={{ opacity: 0, scale: 0.5 }}
@@ -100,18 +111,28 @@ export default function UserCard({ user, onConnect, index = 0 }: UserCardProps) 
                 }
               }}
               whileHover={{ scale: 1.05 }}
+              className="relative"
             >
               {user.profileImageUrl ? (
                 <img 
                   src={user.profileImageUrl} 
                   alt={`${user.displayName}'s profile`}
-                  className="w-20 h-20 rounded-full object-cover mb-3" 
+                  className="w-20 h-20 rounded-full object-cover mb-3 ring-2 ring-white shadow-md" 
                 />
               ) : (
-                <div className="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center mb-3">
-                  <UserIcon className="h-8 w-8 text-gray-500" />
+                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary/20 to-purple/20 flex items-center justify-center mb-3 ring-2 ring-white shadow-md">
+                  <UserIcon className="h-8 w-8 text-primary/70" />
                 </div>
               )}
+              
+              <motion.div
+                variants={matchBadgeVariants}
+                className="absolute -bottom-1 -right-1"
+              >
+                <div className="match-badge shadow-sm">
+                  {user.matchPercentage}% Match
+                </div>
+              </motion.div>
             </motion.div>
             
             <motion.h4 
@@ -120,7 +141,7 @@ export default function UserCard({ user, onConnect, index = 0 }: UserCardProps) 
                 opacity: 1,
                 transition: { delay: index * 0.1 + 0.35 }
               }}
-              className="font-semibold text-base"
+              className="font-bold text-base mt-2"
             >
               {user.displayName}
             </motion.h4>
@@ -131,21 +152,13 @@ export default function UserCard({ user, onConnect, index = 0 }: UserCardProps) 
                 opacity: 1,
                 transition: { delay: index * 0.1 + 0.4 }
               }}
-              className="text-gray-500 text-sm"
+              className="text-gray-600 text-sm text-center mt-1"
             >
               {user.bio || "Event Enthusiast"}
             </motion.p>
-            
-            <motion.div
-              variants={matchBadgeVariants}
-            >
-              <Badge className="mt-2 bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
-                {user.matchPercentage}% Match
-              </Badge>
-            </motion.div>
           </div>
           
-          <div className="mt-3 flex flex-wrap justify-center gap-1">
+          <div className="mt-4 flex flex-wrap justify-center gap-1.5">
             {user.interests.map((interest, i) => (
               <motion.div
                 key={interest}
@@ -154,7 +167,7 @@ export default function UserCard({ user, onConnect, index = 0 }: UserCardProps) 
               >
                 <Badge 
                   variant="outline"
-                  className="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-full"
+                  className="bg-white/80 backdrop-blur-sm text-primary-800 text-xs px-2.5 py-1 rounded-full border-0 shadow-sm"
                 >
                   {interest}
                 </Badge>
@@ -169,15 +182,26 @@ export default function UserCard({ user, onConnect, index = 0 }: UserCardProps) 
               y: 0,
               transition: { delay: index * 0.1 + 0.6 }
             }}
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
+            className="mt-5 flex gap-2"
           >
-            <Button
-              onClick={() => onConnect(user.id)}
-              className="mt-4 w-full bg-primary hover:bg-primary/90 text-white py-2 rounded-lg text-sm font-medium"
-            >
-              Connect
-            </Button>
+            <motion.div className="w-full" whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+              <Button
+                onClick={() => onConnect(user.id)}
+                className="connect-button w-full"
+              >
+                <span className="mr-1.5">Connect</span> 
+              </Button>
+            </motion.div>
+            
+            <motion.div whileHover={{ scale: 1.08 }} whileTap={{ scale: 0.92 }}>
+              <Button
+                variant="outline"
+                className="p-2 rounded-lg border-0 bg-white shadow-sm"
+                onClick={() => onConnect(user.id)}
+              >
+                <MessageCircleIcon className="h-5 w-5 text-primary" />
+              </Button>
+            </motion.div>
           </motion.div>
         </CardContent>
       </Card>
