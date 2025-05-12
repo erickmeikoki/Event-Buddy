@@ -1,18 +1,28 @@
-import User, { UserDocument } from './User';
-import Event, { EventDocument } from './Event';
-import Interest, { InterestDocument } from './Interest';
-import BuddyRequest, { BuddyRequestDocument } from './BuddyRequest';
-import Message, { MessageDocument } from './Message';
+import User from './User';
+import Event from './Event';
+import Interest from './Interest';
+import BuddyRequest from './BuddyRequest';
+import Message from './Message';
+
+// Export types
+import type { UserDocument } from './User';
+import type { EventDocument } from './Event';
+import type { InterestDocument } from './Interest';
+import type { BuddyRequestDocument } from './BuddyRequest';
+import type { MessageDocument } from './Message';
 
 export {
   User,
-  UserDocument,
   Event,
-  EventDocument,
   Interest,
-  InterestDocument,
   BuddyRequest,
+  Message
+};
+
+export type {
+  UserDocument,
+  EventDocument,
+  InterestDocument,
   BuddyRequestDocument,
-  Message,
   MessageDocument
 };

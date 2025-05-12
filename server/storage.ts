@@ -428,8 +428,10 @@ export class FirebaseStorage implements IStorage {
   }
 }
 
-// For demo purposes, we're using the MemStorage implementation
-// In a production app, you'd use FirebaseStorage
+// MongoDB storage implementation is in mongoDbStorage.ts
+import { MongoDBStorage } from './mongoDbStorage';
+
+// In-memory storage implementation for development and testing
 export class MemStorage implements IStorage {
   private users: Map<number, User>;
   private events: Map<number, Event>;
@@ -803,4 +805,9 @@ export class MemStorage implements IStorage {
 }
 
 // Export the storage interface implementation
-export const storage = new MemStorage();
+// Choose the storage implementation to use
+// For production, use MongoDB storage
+export const storage = new MongoDBStorage();
+
+// For development or testing, you can use in-memory storage
+// export const storage = new MemStorage();
