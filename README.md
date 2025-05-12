@@ -58,6 +58,40 @@ VITE_FIREBASE_APP_ID=your_firebase_app_id
    ```
 4. Open your browser to `http://localhost:5000`
 
+### Deployment to Firebase
+
+1. Install Firebase CLI globally:
+   ```
+   npm install -g firebase-tools
+   ```
+   
+2. Login to Firebase:
+   ```
+   firebase login
+   ```
+   
+3. Initialize your Firebase project:
+   ```
+   firebase init
+   ```
+   - Select "Hosting" and "Functions" (for the backend)
+   - Choose your Firebase project
+   - Set "dist" as your public directory
+   - Configure as a single-page app: Yes
+   - Set up automatic builds and deploys: No
+   
+4. Build your project:
+   ```
+   npm run build
+   ```
+   
+5. Deploy to Firebase:
+   ```
+   firebase deploy
+   ```
+
+Once deployed, your app will be available at `https://your-project-id.web.app`
+
 ## Project Structure
 
 ```
