@@ -16,6 +16,7 @@ export interface EventDocument extends Document {
   featured?: boolean;
   
   // Additional properties for MongoDB
+  numericId?: number;     // Added for compatibility with our app schema
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -33,6 +34,7 @@ const EventSchema: Schema = new Schema({
   priceRange: { type: String, required: true },
   organizerId: { type: Number },
   featured: { type: Boolean, default: false },
+  numericId: { type: Number }, // Added for compatibility with our app schema
   attendees: [{ type: Schema.Types.ObjectId, ref: 'User' }],
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },

@@ -93,8 +93,22 @@ export class MongoDBStorage implements IStorage {
   // Event operations
   async getEvent(id: number): Promise<Event | undefined> {
     try {
-      const event = await EventModel.findById(id);
-      if (!event) return undefined;
+      // First try to find by numericId if it exists
+      const event = await EventModel.findOne({ numericId: id });
+      
+      // If not found by numericId, try legacy MongoDB _id approach
+      if (!event) {
+        try {
+          // Try using _id as a fallback
+          const eventById = await EventModel.findById(id);
+          if (!eventById) return undefined;
+          return this.convertEventToSchema(eventById);
+        } catch {
+          // If any error in the fallback, return undefined
+          return undefined;
+        }
+      }
+      
       return this.convertEventToSchema(event);
     } catch (error) {
       console.error('Error getting event:', error);
@@ -125,7 +139,15 @@ export class MongoDBStorage implements IStorage {
 
   async createEvent(eventData: InsertEvent): Promise<Event> {
     try {
-      const newEvent = new EventModel(eventData);
+      // Generate a numeric ID for compatibility with our app schema
+      const numericId = Math.floor(Math.random() * 1000000) + 1;
+      
+      // Create event with the numeric ID
+      const newEvent = new EventModel({
+        ...eventData,
+        numericId
+      });
+      
       const savedEvent = await newEvent.save();
       return this.convertEventToSchema(savedEvent);
     } catch (error) {
@@ -290,7 +312,8 @@ export class MongoDBStorage implements IStorage {
   }
 
   private convertEventToSchema(event: EventDocument): Event {
-    const id = parseInt(event._id?.toString() || '0');
+    // Use the numericId if available, otherwise fallback to converting ObjectId
+    const id = event.numericId || parseInt(event._id?.toString() || '0');
     return {
       id,
       title: event.title || '',
