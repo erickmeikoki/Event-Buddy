@@ -4,6 +4,7 @@ import { storage } from "./storage";
 import * as admin from "firebase-admin";
 import { Event, User, Message, BuddyRequest, Interest } from "@shared/schema";
 import cors from "cors";
+import { fetchChicagoEvents, fetchFeaturedChicagoEvents } from "./services/chicagoEvents";
 
 // Initialize Firebase Admin SDK
 try {
@@ -113,9 +114,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Event routes
   app.get('/api/events', async (req, res) => {
     try {
-      const { category } = req.query;
-      const events = await storage.getEvents(category as string | undefined);
-      res.status(200).json(events);
+      const { category, source } = req.query;
+      
+      // If source=chicago, fetch from Chicago API
+      if (source === 'chicago') {
+        const events = await fetchChicagoEvents(50);
+        
+        // Filter by category if specified
+        const filteredEvents = category 
+          ? events.filter(event => event.category.toLowerCase() === (category as string).toLowerCase())
+          : events;
+          
+        res.status(200).json(filteredEvents);
+      } else {
+        // Otherwise use our storage
+        const events = await storage.getEvents(category as string | undefined);
+        res.status(200).json(events);
+      }
     } catch (error) {
       console.error('Error fetching events:', error);
       res.status(500).json({ message: 'Failed to fetch events' });
@@ -124,11 +139,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/events/featured', async (req, res) => {
     try {
-      const featuredEvents = await storage.getFeaturedEvents();
-      res.status(200).json(featuredEvents);
+      const { source } = req.query;
+      
+      // If source=chicago, fetch featured events from Chicago API
+      if (source === 'chicago') {
+        const featuredEvents = await fetchFeaturedChicagoEvents(5);
+        res.status(200).json(featuredEvents);
+      } else {
+        // Otherwise use our storage
+        const featuredEvents = await storage.getFeaturedEvents();
+        res.status(200).json(featuredEvents);
+      }
     } catch (error) {
       console.error('Error fetching featured events:', error);
       res.status(500).json({ message: 'Failed to fetch featured events' });
+    }
+  });
+  
+  // Dedicated endpoint for Chicago events
+  app.get('/api/chicago-events', async (req, res) => {
+    try {
+      const { limit = '50', category } = req.query;
+      const numLimit = parseInt(limit as string) || 50;
+      
+      const events = await fetchChicagoEvents(numLimit);
+      
+      // Filter by category if specified
+      const filteredEvents = category 
+        ? events.filter(event => event.category.toLowerCase() === (category as string).toLowerCase())
+        : events;
+        
+      res.status(200).json(filteredEvents);
+    } catch (error) {
+      console.error('Error fetching Chicago events:', error);
+      res.status(500).json({ message: 'Failed to fetch Chicago events' });
     }
   });
 
