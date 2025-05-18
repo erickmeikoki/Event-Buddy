@@ -6,8 +6,8 @@ set -e
 # Ensure we're using Node.js 18 or higher
 echo "Checking Node.js version..."
 NODE_VERSION=$(node -v)
-if [[ ! $NODE_VERSION =~ ^v18 && ! $NODE_VERSION =~ ^v20 ]]; then
-  echo "Please use Node.js v18 or v20 for Firebase deployment"
+if [[ ! $NODE_VERSION =~ ^v18 && ! $NODE_VERSION =~ ^v20 && ! $NODE_VERSION =~ ^v22 ]]; then
+  echo "Please use Node.js v18, v20, or v22 for Firebase deployment"
   exit 1
 fi
 
